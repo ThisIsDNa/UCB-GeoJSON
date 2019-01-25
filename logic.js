@@ -5,7 +5,7 @@
 // Perform a GET request to the query URL
 // Once we get a response, send the data.features object to the createFeatures function
 // ---------------------------------------------------------------------------------------------------
-var query = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson"
+var query = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
 var tectonicQuery = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
 var tectonic = new L.LayerGroup();
 var earthquakes = new L.LayerGroup();
@@ -28,31 +28,48 @@ d3.json(tectonicQuery, function(plates) {
 // Run the onEachFeature function once for each piece of data in the array
 // Sending our earthquakes layer to the createMap function
 // ---------------------------------------------------------------------------------------------------
+
 function getColor(d) {
-  return d < 1  ? '#FAEBD7' :
-         d < 2  ? '#90EE90' :
-         d < 3  ? '#98FB98' :
-         d < 4  ? '#7CFC00' :
-         d < 5  ? '#32CD32' :
-         d < 6  ? '#228B22' :
-                  '#008000' ;
-}
+   return d < 1  ? '#FAEBD7' :
+          d < 2  ? '#90EE90' :
+          d < 3  ? '#98FB98' :
+          d < 4  ? '#7CFC00' :
+          d < 5  ? '#32CD32' :
+          d < 6  ? '#228B22' :
+                   '#008000' ;
+ }
 
 function createFeatures(earthquakes) { 
+  function pointToLayer(feature, latlng){
+          return new L.circle(latlng,
+          {radius: 4*feature.properties.mag,
+           fillColor: "#000000",
+           weight: 1,
+           opacity: 0.75,
+           fillOpacity: 0.8});
+  }
+  function onEachFeature(feature, layer) {
+    layer.bindPopup("<h3>" + feature.properties.place + "</h3><hr><p>" + 
+                    new Date(feature.properties.time) + "</p>" + 
+                    "</h3><hr><p>Magnitude (ML): " + feature.properties.mag + "</p>")
+  }
+
   var earthquakes = L.geoJson(earthquakes, {
-    onEachFeature: function (feature, layer){
-        layer.bindPopup("<h3>" + feature.properties.place +
-        "</h3><hr><p>" + new Date(feature.properties.time) + "</p>" +
-        "</h3><hr><p>Magnitude (ML): " + feature.properties.mag + "</p>");
-    },
-    pointToLayer: function (feature, latlng) {
-      return new L.circle(latlng,
-        {radius: 4*feature.properties.mag,
-         fillColor: "black",
-         weight: 1,
-         opacity: 1,
-         fillOpacity: 0.8});
-    }
+//    onEachFeature: function (feature, layer){
+//        layer.bindPopup("<h3>" + feature.properties.place +
+//        "</h3><hr><p>" + new Date(feature.properties.time) + "</p>" +
+//        "</h3><hr><p>Magnitude (ML): " + feature.properties.mag + "</p>");
+//    },
+//    pointToLayer: function (feature, latlng) {
+//      return new L.circle(latlng,
+//        {radius: 4*feature.properties.mag,
+//         fillColor: "#000000",
+//         weight: 1,
+//         opacity: 0.75,
+//         fillOpacity: 0.8});
+//    }
+      pointToLayer: pointToLayer,
+      onEachFeature: onEachFeature
   });
 createMap(earthquakes);
 }
@@ -65,39 +82,39 @@ createMap(earthquakes);
 //
 // https://stackoverflow.com/questions/28217868/mapbox-tile-is-not-being-added-to-leaflet-js-map
 // ---------------------------------------------------------------------------------------------------
-function createMap() {
+function createMap(earthquakes) {
 
 var streetmap = L.tileLayer('https://{s}.tiles.mapbox.com/v4/{mapId}/{z}/{x}/{y}.png?access_token={token}', {
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
     maxZoom: 18,
     mapId: 'mapbox.streets',
-    token: 'pk.eyJ1IjoidGhpc2lzZG5hIiwiYSI6ImNqcjhseXJkMTA3bnIzeW1wa3E2c3FpZXkifQ.xSTtKyk3LYmgSNzpPVZScw'
- });
+    token: API_KEY
+});
 
 var lightmap = L.tileLayer('https://{s}.tiles.mapbox.com/v4/{mapId}/{z}/{x}/{y}.png?access_token={token}', {
      attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
      maxZoom: 18,
      mapId: 'mapbox.light',
-     token: 'pk.eyJ1IjoidGhpc2lzZG5hIiwiYSI6ImNqcjhseXJkMTA3bnIzeW1wa3E2c3FpZXkifQ.xSTtKyk3LYmgSNzpPVZScw'
- });
+     token: API_KEY
+});
 
 var darkmap = L.tileLayer('https://{s}.tiles.mapbox.com/v4/{mapId}/{z}/{x}/{y}.png?access_token={token}', {
      attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
      maxZoom: 18,
      mapId: 'mapbox.dark',
-     token: 'pk.eyJ1IjoidGhpc2lzZG5hIiwiYSI6ImNqcjhseXJkMTA3bnIzeW1wa3E2c3FpZXkifQ.xSTtKyk3LYmgSNzpPVZScw'
- });
+     token: API_KEY
+});
 
 var baseMaps = {
     "Light Map": lightmap,
     "Street Map": streetmap,
     "Dark Map": darkmap
-  };
+};
 
 var overlayMaps = {
-  TectonicPlates: tectonic,
-  Earthquakes: earthquakes
-},      
+  Earthquakes: earthquakes,
+  TectonicPlates: tectonic
+};      
   
 var myMap = L.map("map", {
     center: [37.09, -95.71],
@@ -119,8 +136,7 @@ var legend = L.control({position: 'bottomright'});
 legend.onAdd = function (myMap) {
    var div = L.DomUtil.create('div', 'info legend'),
        magnitude = [0, 1, 2, 3, 4, 5, 6];
-       labels = [];
-       div.innerHTML+='Magnitude<br><hr>'      
+       labels = [];  
        for (var i = 0; i < magnitude.length; i++) {
            div.innerHTML += '<i style="background:' + getColor(magnitude[i] + 1) + '"></i> ' +
                              magnitude[i] + (magnitude[i + 1] ? '&ndash;' + magnitude[i + 1] + 
