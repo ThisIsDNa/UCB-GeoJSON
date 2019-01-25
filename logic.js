@@ -54,6 +54,8 @@ function createFeatures(earthquakes) {
                     "</h3><hr><p>Magnitude (ML): " + feature.properties.mag + "</p>")
   }
 
+// Only works if it's put in a f(x)???
+
   var earthquakes = L.geoJson(earthquakes, {
 //    onEachFeature: function (feature, layer){
 //        layer.bindPopup("<h3>" + feature.properties.place +
