@@ -10,14 +10,11 @@ body {
   }
   
   .legend {
-    padding: 16px 18px;
-    font: 12px Arial, Helvetica, sans-serif;
-    font-weight: lighter;
-    color: #555;
-    background: #fff;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 5px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  line-height: 18px;
+  color: #555;
+  background-color: #fff;
+  border-radius: 5px;
   }
   
   .legend i {
